@@ -1,4 +1,4 @@
-module github.com/hbarral/petitorium-plugin-sdk
+module github.com/petitorium/petitorium-plugin-sdk
 
 go 1.23
 

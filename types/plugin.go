@@ -21,3 +21,9 @@ type Plugin interface {
 	// HookFuncs returns a map of hook functions keyed by hook type
 	HookFuncs() map[HookType]PluginHook
 }
+
+// PluginConfig holds configuration for plugins
+type PluginConfig struct {
+	Enabled []string               `yaml:"enabled"`
+	Config  map[string]interface{} `yaml:"config,omitempty"`
+}

@@ -8,6 +8,7 @@ type HookType string
 const (
 	// Request Lifecycle Hooks
 	PreRequest               HookType = "pre_request"                // Before request is sent (with template variables)
+	PreVariableSubstitution  HookType = "pre_variable_substitution"  // Before environment variables are substituted
 	PostVariableSubstitution HookType = "post_variable_substitution" // After environment variables are substituted
 	PreSend                  HookType = "pre_send"                   // Just before sending the request
 	PostSend                 HookType = "post_send"                  // After request is sent
