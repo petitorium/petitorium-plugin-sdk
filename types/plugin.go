@@ -24,6 +24,15 @@ type Plugin interface {
 
 // PluginConfig holds configuration for plugins
 type PluginConfig struct {
-	Enabled []string               `yaml:"enabled"`
-	Config  map[string]interface{} `yaml:"config,omitempty"`
+	RegistryURL string                   `yaml:"registry_url" mapstructure:"registry_url"`
+	Enabled     []string                 `yaml:"enabled" mapstructure:"enabled"`
+	Installed   map[string]InstalledInfo `yaml:"installed,omitempty" mapstructure:"installed"`
+	Config      map[string]interface{}   `yaml:"config,omitempty" mapstructure:"config"`
+}
+
+// InstalledInfo holds metadata about an installed plugin
+type InstalledInfo struct {
+	Version  string `yaml:"version" mapstructure:"version"`
+	Checksum string `yaml:"checksum" mapstructure:"checksum"`
+	Path     string `yaml:"path" mapstructure:"path"`
 }
