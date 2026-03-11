@@ -20,6 +20,7 @@ type Release struct {
 
 // RegistryPlugin represents plugin metadata from the registry
 type RegistryPlugin struct {
+	ID          uuid.UUID  `json:"id"`
 	Name        string     `json:"name"`
 	Version     string     `json:"version"`
 	Description string     `json:"description"`
@@ -27,4 +28,6 @@ type RegistryPlugin struct {
 	Repository  string     `json:"repository"`
 	Official    bool       `json:"official"`
 	Releases    []*Release `json:"releases"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
