@@ -61,8 +61,8 @@ type HookContext struct {
 	// Request contains the HTTP request data
 	Request *RequestData
 
-	// Response contains the HTTP response data (interface{} for flexibility)
-	Response interface{}
+	// Response contains the HTTP response data
+	Response *ResponseData
 
 	// Environment contains environment variables for variable substitution
 	Environment map[string]string

@@ -18,8 +18,9 @@ type Plugin interface {
 	// Hooks returns the list of hook types this plugin implements
 	Hooks() []HookType
 
-	// HookFuncs returns a map of hook functions keyed by hook type
-	HookFuncs() map[HookType]PluginHook
+	// ExecuteHook executes a specific hook with the given context.
+	// It returns the (potentially modified) context and an error if execution failed.
+	ExecuteHook(hookType HookType, ctx *HookContext) (*HookContext, error)
 }
 
 // PluginConfig holds configuration for plugins

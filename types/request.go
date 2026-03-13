@@ -32,7 +32,7 @@ type ResponseData struct {
 	Status string
 
 	// Headers contains the response headers
-	Headers map[string]string
+	Headers map[string][]string
 
 	// Body contains the response body
 	Body string

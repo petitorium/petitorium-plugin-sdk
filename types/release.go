@@ -20,14 +20,14 @@ type Release struct {
 
 // RegistryPlugin represents plugin metadata from the registry
 type RegistryPlugin struct {
-	ID          uuid.UUID  `json:"id"`
-	Name        string     `json:"name"`
-	Version     string     `json:"version"`
-	Description string     `json:"description"`
-	Author      string     `json:"author"`
-	Repository  string     `json:"repository"`
-	Official    bool       `json:"official"`
+	ID          uuid.UUID  `db:"id,omitempty" json:"id"`
+	Name        string     `db:"name" json:"name"`
+	Version     string     `db:"version" json:"version"`
+	Description string     `db:"description" json:"description"`
+	Author      string     `db:"author" json:"author"`
+	Repository  string     `db:"repository" json:"repository"`
+	Official    bool       `db:"official" json:"official"`
 	Releases    []*Release `json:"releases"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	CreatedAt   time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time  `db:"updated_at" json:"updated_at"`
 }
