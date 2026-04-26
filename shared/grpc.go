@@ -121,6 +121,7 @@ func protoToTypesContext(p *proto.HookContext) *types.HookContext {
 
 	ctx := &types.HookContext{
 		Environment: p.Environment,
+		Workspace:   p.Workspace,
 	}
 
 	if len(p.ConfigJson) > 0 {
@@ -165,6 +166,7 @@ func typesToProtoContext(t *types.HookContext) *proto.HookContext {
 
 	ctx := &proto.HookContext{
 		Environment: t.Environment,
+		Workspace:   t.Workspace,
 	}
 
 	if t.Config != nil {
