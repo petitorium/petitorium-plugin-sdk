@@ -69,6 +69,9 @@ type HookContext struct {
 
 	// Config contains plugin-specific configuration from the main config file
 	Config map[string]interface{}
+
+	// Workspace is the current workspace name
+	Workspace string
 }
 
 // PluginHook defines the function signature that all plugin hooks must implement.

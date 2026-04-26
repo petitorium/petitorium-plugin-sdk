@@ -30,6 +30,7 @@ message HookContext {
   ResponseData response = 2;
   map<string, string> environment = 3;
   bytes config_json = 4;
+  string workspace = 5;
 }
 
 message PluginInfo {
