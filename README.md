@@ -34,6 +34,8 @@ go get github.com/petitorium/petitorium-plugin-sdk
 package main
 
 import (
+    "github.com/hashicorp/go-plugin"
+    "github.com/petitorium/petitorium-plugin-sdk/shared"
     "github.com/petitorium/petitorium-plugin-sdk/types"
 )
 
@@ -55,65 +57,83 @@ func (p *MyPlugin) Hooks() []types.HookType {
     return []types.HookType{types.PreRequest, types.PostReceive}
 }
 
-func (p *MyPlugin) HookFuncs() map[types.HookType]types.PluginHook {
-    return map[types.HookType]types.PluginHook{
-        types.PreRequest:  p.handlePreRequest,
-        types.PostReceive: p.handlePostReceive,
+func (p *MyPlugin) ExecuteHook(hookType types.HookType, ctx *types.HookContext) (*types.HookContext, error) {
+    switch hookType {
+    case types.PreRequest:
+        // Handle pre-request logic here
+    case types.PostReceive:
+        // Handle post-receive logic here
     }
+    return ctx, nil
 }
 
-func (p *MyPlugin) handlePreRequest(ctx *types.HookContext) error {
-    // Your pre-request logic here
-    return nil
+func main() {
+    plugin.Serve(&plugin.ServeConfig{
+        HandshakeConfig: shared.Handshake,
+        Plugins: map[string]plugin.Plugin{
+            "my-plugin": &shared.PetitoriumPlugin{Impl: &MyPlugin{}},
+        },
+        GRPCServer: plugin.DefaultGRPCServer,
+    })
 }
-
-func (p *MyPlugin) handlePostReceive(ctx *types.HookContext) error {
-    // Your post-receive logic here
-    return nil
-}
-
-// Export the plugin instance
-var Plugin types.Plugin = &MyPlugin{}
 ```
 
-4. Build your plugin:
+4. Build your plugin as a standalone executable:
 
 ```bash
-go build -buildmode=plugin -o my-plugin.so .
+go build -o my-plugin .
+# Or cross-compile for other platforms
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o my-plugin .
 ```
 
 ### For Petitorium Core Developers
 
-Import the SDK in your main application:
+Import the SDK and `go-plugin` in your main application:
 
 ```go
-import "github.com/petitorium/petitorium-plugin-sdk/types"
+import (
+    "os/exec"
+    "github.com/hashicorp/go-plugin"
+    "github.com/petitorium/petitorium-plugin-sdk/shared"
+    "github.com/petitorium/petitorium-plugin-sdk/types"
+)
 ```
 
-Use the interfaces to load and manage plugins:
+Use `go-plugin` to load and manage plugins over gRPC:
 
 ```go
-// Load a plugin
-plugin, err := plugin.Open("path/to/plugin.so")
+// Create an exec.Cmd to launch the plugin process
+client := plugin.NewClient(&plugin.ClientConfig{
+    HandshakeConfig: shared.Handshake,
+    Plugins: map[string]plugin.Plugin{
+        "my-plugin": &shared.PetitoriumPlugin{},
+    },
+    Cmd:              exec.Command("path/to/my-plugin"),
+    AllowedProtocols: []plugin.Protocol{plugin.ProtocolGRPC},
+})
+defer client.Kill()
+
+// Connect via RPC
+rpcClient, err := client.Client()
 if err != nil {
     return err
 }
 
-// Lookup the plugin symbol
-sym, err := plugin.Lookup("Plugin")
+// Request the plugin instance
+raw, err := rpcClient.Dispense("my-plugin")
 if err != nil {
     return err
 }
 
 // Cast to the interface
-petitoriumPlugin, ok := sym.(types.Plugin)
+petitoriumPlugin, ok := raw.(types.Plugin)
 if !ok {
     return fmt.Errorf("invalid plugin type")
 }
 
 // Use the plugin
 hooks := petitoriumPlugin.Hooks()
-hookFuncs := petitoriumPlugin.HookFuncs()
+ctx, err := petitoriumPlugin.ExecuteHook(types.PreRequest, &types.HookContext{})
 ```
 
 ## Hook Types
@@ -180,18 +200,13 @@ type HookContext struct {
     Response    interface{}       // HTTP response data
     Environment map[string]string // Environment variables
     Config      map[string]interface{} // Plugin config
+    Workspace   string            // Active workspace name
 }
 ```
 
 ## Versioning
 
 This SDK follows [Semantic Versioning](https://semver.org/). The version is independent of Petitorium's version to allow for independent evolution of the plugin API.
-
-### Compatibility Promise
-
-- **Major version changes** (1.x.x → 2.0.0): Breaking changes to interfaces
-- **Minor version changes** (1.1.x → 1.2.0): New features, backward compatible
-- **Patch version changes** (1.1.1 → 1.1.2): Bug fixes only
 
 ## Best Practices
 
@@ -213,28 +228,20 @@ This SDK follows [Semantic Versioning](https://semver.org/). The version is inde
 
 ## Examples
 
-See the [examples directory](https://github.com/petitorium/petitorium-plugin-sdk/tree/main/examples) for complete plugin examples:
+- [**Request Logger**](https://github.com/petitorium/petitorium-plugin-request-logger) - A comprehensive request and response logging plugin for [Petitorium](https://github.com/petitorium/petitorium) that provides detailed logging of HTTP requests and responses with support for both raw template variables and expanded environment variables.
+- [**Auth Injector**](https://github.com/petitorium/petitorium-plugin-auth-injector) - An authentication injection plugin for [Petitorium](https://github.com/petitorium/petitorium) that automatically injects authentication headers into HTTP requests and captures authentication tokens from responses.
+- [**Auth Retriever**](https://github.com/petitorium/petitorium-plugin-auth-retriever) - An authentication retrieval plugin for [Petitorium](https://github.com/petitorium/petitorium) that automatically captures authentication tokens from responses and stores them in environment variables for flexible usage.
 
-- **Request Logger** - Logs all requests and responses
-- **Auth Injector** - Adds authentication headers
-- **Response Transformer** - Modifies response data
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
 
-This SDK is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This SDK is licensed under the MIT License.
 
 ## Support
 
-- 📖 [Documentation](https://github.com/petitorium/petitorium-plugin-sdk/wiki)
 - 🐛 [Issue Tracker](https://github.com/petitorium/petitorium-plugin-sdk/issues)
-- 💬 [Discussions](https://github.com/petitorium/petitorium-plugin-sdk/discussions)
 
 ## Related Projects
 
 - [Petitorium](https://github.com/petitorium/petitorium) - The main API client application
-- [Petitorium Plugin Registry](https://github.com/petitorium/petitorium-plugins) - Community plugin registry
 
